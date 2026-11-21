@@ -97,6 +97,10 @@ struct CommonOptions {
     /// 0 = plain decode.  `spec_oracle` drafts from a token file (the expected continuation, for the exactness test).
     int spec = 0;
     bool spec_given = false;           ///< --spec on the command line
+    /// --spec-min-p: how sure the drafts must be to extend a verify window by another guess.  The whole draft prefix's
+    /// chance has to clear it, else the window stops growing.  0 = the measured cost alone decides (the engine's
+    /// default); the knob Strata's calibrator tunes, where a slower CPU wants a higher floor.
+    double spec_min_p = 0.0;
     /// The suffix drafter (prompt lookup): when the text being written repeats an earlier stretch of the context (code
     /// edits, quoted input, tool-call JSON) by at least this many tokens, a window may hold what followed it there instead
     /// of the drafter's drafts, where the draft policy expects it to pay (basalt/spec/draft_policy.hpp).  Read by the models

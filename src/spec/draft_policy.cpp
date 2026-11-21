@@ -38,8 +38,8 @@ constexpr double kProbeChance = 0.85;   // the joint chance at which a drafter w
 
 }  // namespace
 
-DraftPolicy::DraftPolicy(int max_t, double margin, bool timed)
-    : max_t_(std::clamp(max_t, 1, kMaxT)), margin_(margin), timed_(timed) {}
+DraftPolicy::DraftPolicy(int max_t, double margin, bool timed, double min_p)
+    : max_t_(std::clamp(max_t, 1, kMaxT)), margin_(margin), timed_(timed), min_p_(std::clamp(min_p, 0.0, 1.0)) {}
 
 int DraftPolicy::bucket(int match) {
     return match < 6 ? 0 : match < 12 ? 1 : match < 24 ? 2 : 3;
@@ -176,6 +176,9 @@ int DraftPolicy::window(const float* chance, int n) const {
     int best_t = 1;
     for (int t = 2; t <= most; ++t) {
         all *= chance_rate(chance[t - 2]);
+        // --spec-min-p: extending the window to t needs the whole prefix to come in; not sure enough, and no longer
+        // window is either (the chance only falls). 0 = off, and the measured cost alone decides.
+        if (min_p_ > 0 && all < min_p_) break;
         e += all;
         const double r = e / cost_ms(t);
         if (r > best) { best = r; best_t = t; }

@@ -54,6 +54,7 @@ bool parse_flag(const std::string& a, model::FlagArgs& args, Options& o, int& co
     else if (a == "--prefill-until") o.prefill_until = std::atoll(args.next("--prefill-until"));
     else if (a == "--dump-final-r") o.dump_final_r = args.next("--dump-final-r");
     else if (a == "--spec") { o.spec = std::atoi(args.next("--spec")); o.spec_given = true; }
+    else if (a == "--spec-min-p") o.spec_min_p = std::atof(args.next("--spec-min-p"));
     else if (a == "--spec-oracle") o.spec_oracle = args.next("--spec-oracle");
     else if (a == "--spec-corrupt") o.spec_corrupt = std::atoi(args.next("--spec-corrupt"));
     else if (a == "--mtp-window") o.mtp_window = std::atoll(args.next("--mtp-window"));

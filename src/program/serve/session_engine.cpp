@@ -51,8 +51,8 @@ public:
             return 1;
         }
         // one policy for the solo windows and one for the batch windows, whose rounds cost differently
-        policy.emplace(session().max_window());
-        bpolicy.emplace(session().max_window());
+        policy.emplace(session().max_window(), 0.03, true, o.spec_min_p);
+        bpolicy.emplace(session().max_window(), 0.03, true, o.spec_min_p);
         if (lookup_on()) sfx.emplace(std::max(1, o.suffix_draft), 64, (size_t) o.max_context + 4096);
         if (o.batch > 0) {
             bs.resize((size_t) o.batch);

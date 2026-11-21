@@ -36,8 +36,10 @@ public:
     static constexpr int kBuckets = 4;
 
     /// `timed` false: round times are not read, every round costs the prior shape of its size, so the picks follow the
-    /// drafts' outcomes alone (the same tokens give the same windows on every run).
-    explicit DraftPolicy(int max_t, double margin = 0.03, bool timed = true);
+    /// drafts' outcomes alone (the same tokens give the same windows on every run).  `min_p` > 0: a window stops
+    /// growing once the whole draft prefix's chance of being accepted falls below it (Strata's --spec-min-p); 0 lets
+    /// the measured cost alone decide, which is the engine's default.
+    explicit DraftPolicy(int max_t, double margin = 0.03, bool timed = true, double min_p = 0.0);
 
     struct Pick {
         bool lookup = false;
@@ -80,6 +82,7 @@ private:
     int max_t_;
     double margin_;
     bool timed_;
+    double min_p_ = 0.0;                                   // --spec-min-p: the least chance that extends a window
     double scale_ = 0.0;                                   // round ms = scale x base(size)
     std::array<double, kMaxT + 1> base_{}, base_n_{};      // by window size; rounds behind it
     std::array<long, kMaxT + 1> seen_{};                   // the round each size was last measured
