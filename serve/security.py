@@ -18,16 +18,32 @@ FORWARDING_PREFIXES = ("x-forwarded-", "x-original-", "x-envoy-", "x-amzn-", "x-
                        "tailscale-")
 
 
-def exposed_without_key(host: str, api_key: str) -> bool:
+def key_list(value) -> list[str]:
+    """The keys a server accepts. A string holds them separated by commas ("k1,k2", the spaces around each
+    dropped); a list is taken as it is. Empty pieces are skipped, so a trailing comma is harmless."""
+    if value is None or value == "":
+        return []
+    if isinstance(value, (list, tuple)):
+        return [str(k).strip() for k in value if str(k).strip()]
+    return [k.strip() for k in str(value).split(",") if k.strip()]
+
+
+def exposed_without_key(host: str, api_key) -> bool:
     """True when the server listens beyond this PC without an API key."""
-    return host not in LOOPBACK_NAMES and not api_key
+    return host not in LOOPBACK_NAMES and not key_list(api_key)
 
 
-def api_key_of(value) -> str:
-    """The key as a client can send it. An HTTP header loses the spaces and line ends around its value, so a key kept
-    with them would match no request. A value that is only such characters raises ValueError: it never means "no key"."""
+def api_key_of(value):
+    """The keys as a client can send them. A string keeps its commas (they separate keys, see key_list); a list is
+    taken as it is. An HTTP header loses the spaces and line ends around its value, so every key is stripped. A value
+    holding no key at all raises ValueError: it never means "no key"."""
+    if isinstance(value, (list, tuple)):
+        keys = [str(k).strip() for k in value]
+        if not keys or any(not k for k in keys):
+            raise ValueError("an API key was given but it is empty")
+        return keys
     key = "" if value is None else str(value)
-    if key and not key.strip():
+    if key and not key_list(key):
         raise ValueError("an API key was given but it is empty")
     return key.strip()
 
@@ -45,16 +61,19 @@ def api_key_from_file(path: str) -> str:
     return line
 
 
-def key_matches(given: str, key: str) -> bool:
-    """`given` is a header's value as http.server read it, each byte one character. A key with characters outside
-    ASCII arrives as UTF-8 from most clients and as Latin-1 from some; the right key passes in both forms.
-    Constant-time."""
+def key_matches(given: str, key) -> bool:
+    """`given` is a header's value as http.server read it, each byte one character. `key` may name several keys
+    (see key_list): the given one must match any of them, and every key is compared whatever the outcome, so the
+    time taken does not reveal which key matched. A key with characters outside ASCII arrives as UTF-8 from most
+    clients and as Latin-1 from some; the right key passes in both forms. Constant-time."""
     raw = given.encode("latin-1", "replace")
-    ok = hmac.compare_digest(raw, key.encode())
-    try:
-        ok |= hmac.compare_digest(raw, key.encode("latin-1"))
-    except UnicodeEncodeError:
-        pass
+    ok = False
+    for k in key_list(key):
+        ok |= hmac.compare_digest(raw, k.encode())
+        try:
+            ok |= hmac.compare_digest(raw, k.encode("latin-1"))
+        except UnicodeEncodeError:
+            pass
     return ok
 
 

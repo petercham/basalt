@@ -588,8 +588,8 @@ def build_parser() -> argparse.ArgumentParser:
                     help="hold every tool call and JSON response format to a grammar in the engine (on by default; a request "
                          "with strict: true gets it either way); --no-grammar turns it off")
     ap.add_argument("--api-key", default="",
-                    help="require this key on /v1/* (Authorization: Bearer ... or x-api-key); command line only, "
-                         "not allowed in a --config file")
+                    help="require this key on /v1/* (Authorization: Bearer ... or x-api-key); several keys may be "
+                         "given separated by commas (\"k1,k2\"); command line only, not allowed in a --config file")
     ap.add_argument("--api-key-file", default="", metavar="FILE",
                     help="read that key from the first line of FILE, which keeps it out of the process list; command "
                          "line only")
