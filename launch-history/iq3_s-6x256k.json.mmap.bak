@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "models": [
+    {
+      "model": "C:/Work/LLM/Basalt/models/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S.basalt",
+      "alias": "qwen3.8-flash-next",
+      "gpu": "0",
+      "kv": "int8",
+      "kv-resident": 131072,
+      "max-context": 262144,
+      "parallel": 6,
+      "slot-full-context": true,
+      "vision": "0"
+    }
+  ],
+  "engine": {
+    "mmap-experts": true,
+    "vram-reserve-mib": 700,
+    "ram-reserve-mib": 0,
+    "spec": 8
+  },
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8787
+  }
+}
