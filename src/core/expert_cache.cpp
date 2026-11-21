@@ -22,6 +22,8 @@ bool read_expert_profile(const FileRange& range, int64_t n_layers, int64_t n_exp
         return false;
     }
     size_t at = 0;
+    // Strata's calibrator writes this layout behind a 4-byte "STRP" tag; a profile learned there is read as is.
+    if (raw_file.size() >= 4 && std::memcmp(raw_file.data(), "STRP", 4) == 0) at = 4;
     uint32_t hdr[5] = {0, 0, 0, 0, 0};
     if (raw_file.size() - at < sizeof hdr) {
         err = "read_expert_profile: " + path + " is too short to hold a header";
